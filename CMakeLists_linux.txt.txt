@@ -1,0 +1,57 @@
+cmake_minimum_required(VERSION 3.10)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_EXE_LINKER_FLAGS)
+
+project(trt_calib LANGUAGES CXX)
+
+# set CUDA 
+find_package(CUDA REQUIRED)
+include_directories(${CUDA_INCLUDE_DIRS})
+
+find_library(CUDNN_LIB cudnn HINTS
+    ${CUDA_TOOLKIT_ROOT_DIR} ${CUDNN_ROOT_DIR} PATH_SUFFIXES lib64 lib)
+find_library(CUBLAS_LIB cublas HINTS
+    ${CUDA_TOOLKIT_ROOT_DIR} PATH_SUFFIXES lib64 lib lib/stubs)
+find_library(CUBLASLT_LIB cublasLt HINTS
+    ${CUDA_TOOLKIT_ROOT_DIR} PATH_SUFFIXES lib64 lib lib/stubs)
+find_library(CUDART_LIB cudart HINTS 
+    ${CUDA_TOOLKIT_ROOT_DIR} PATH_SUFFIXES lib lib64)
+
+message(STATUS "================ CUDA ENV ====================")
+message(STATUS "Found CUDA ${CUDA_VERSION_STRING} at ${CUDA_TOOLKIT_ROOT_DIR}")
+message(STATUS "Found CUBLAS_LIB ${CUBLAS_LIB} ")
+message(STATUS "Found CUBLASLT_LIB ${CUBLASLT_LIB}")
+message(STATUS "Found CUDART_LIB ${CUDART_LIB}")
+message(STATUS "Found CUDNN_LIB ${CUDNN_LIB}")
+
+# set Opencv
+set(OpenCV_DIR "D:/ThangLM/prebuilt-libopencv/opencv/build")
+find_package(OpenCV  REQUIRED)
+
+# set TensorRT
+
+include_directories(${PROJECT_SOURCE_DIR}/common)
+
+file(GLOB SOURCE_LIST 
+common/*.cpp        
+src/TrtBuilder.cpp 
+src/main.cpp
+)
+
+
+cuda_add_executable(${PROJECT_NAME} ${SOURCE_LIST})
+            
+target_link_libraries(${PROJECT_NAME} 
+${OpenCV_LIBS}
+${CUBLAS_LIB}
+${CUBLASLT_LIB}
+${CUDART_LIB}
+${CUDNN_LIB}
+nvinfer
+nvparsers
+nvinfer_plugin
+nvonnxparser
+)
+
+
